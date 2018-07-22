@@ -1,15 +1,16 @@
-import json
-import smtplib
-from email.mime.text import MIMEText
-import requests
-from bs4 import BeautifulSoup
 from crawling import getNoticePosts
+from notice import send_mail
+from boto3.dynamodb.conditions import Key, Attr
+from botocore.exceptions import ClientError
+from email.mime.text import MIMEText
+from bs4 import BeautifulSoup
 from datetime import date, datetime
+import requests
 import pytz
 import boto3
 import decimal
-from boto3.dynamodb.conditions import Key, Attr
-from botocore.exceptions import ClientError
+import json
+import smtplib
 
 
 # def get(event):
@@ -46,6 +47,7 @@ from botocore.exceptions import ClientError
 # 	#return {'body': json.dumps(event)}
 # 	result = router(event)
 # 	return {'body': json.dumps(result)}
+
 
 class DecimalEncoder(json.JSONEncoder):
     def default(self, o):
