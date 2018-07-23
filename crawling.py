@@ -58,8 +58,11 @@ def getPosts(URL):
 			# 번호
 			number = tds[incount].get_text()
 			incount += 1
+			# 공지이면 정보를 읽지 않음
+			if isNotice:
+				continue
 			# 공지가 아니면 인덱스를 +1 해줌
-			if not isNotice:
+			else:
 				incount += 1
 			# 제목
 			title = ''
@@ -93,7 +96,7 @@ if __name__ == '__main__':
 	CAREER = 'http://computer.knu.ac.kr/07_sub/01_sub_4.html'
 
 	# 함수 실행
-	posts = getNoticePosts(CAREER)
+	posts = getPosts(CAREER)
 	# 표준출력
 	for post in posts:
 		print(post)

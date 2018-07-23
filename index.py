@@ -52,6 +52,9 @@ def newPostsToString(posts, table, title):
 	
 	return body
 
+def getTitleString(boardname):
+	return '=' * 20 + ' ' + boardname + ' ' + '=' * 20 + '\n' * 2
+
 
 def handler(event, context):
 	# 크롤링 할 URL
@@ -69,7 +72,7 @@ def handler(event, context):
 	# dynamo DB
 	dynamodb = boto3.resource('dynamodb', region_name='ap-northeast-2')
 	# 공지사항 게시판
-	NoticeTitle = '=' * 20 + ' 공지사항 ' + '=' * 20 + '\n' * 2
+	NoticeTitle = getTitleString('공지사항')
 	NoticeBoard = dynamodb.Table('NoticeBoard')
 	NoticePosts = getPosts(NOTICE)
 	NoticeBody = newPostsToString(NoticePosts, NoticeBoard, NoticeTitle)
@@ -77,7 +80,7 @@ def handler(event, context):
 		body += '\n\n'
 		body += NoticeBody
 	# 학사 게시판
-	CourseTitle = '=' * 20 + ' 학사 ' + '=' * 20 + '\n' * 2
+	CourseTitle = getTitleString('학사')
 	CourseBoard = dynamodb.Table('CourseBoard')
 	CoursePosts = getPosts(COURSE)
 	CourseBody = newPostsToString(CoursePosts, CourseBoard, CourseTitle)
@@ -85,18 +88,22 @@ def handler(event, context):
 		body += '\n\n'
 		body += CourseBody
 	# ABEEK 게시판
-	AbeekTitle = '=' * 20 + ' ABEEK ' + '=' * 20 + '\n' * 2
+	AbeekTitle = getTitleString('ABEEK')
 	AbeekBoard = dynamodb.Table('AbeekBoard')
-	Abeekposts = getPosts(ABEEK)
-	AbeekBody = newPostsToString(Abeekposts, AbeekBoard, AbeekTitle)
+	AbeekPosts = getPosts(ABEEK)
+	AbeekBody = newPostsToString(AbeekPosts, AbeekBoard, AbeekTitle)
 	if AbeekBody != '':
 		body += '\n\n'
 		body += AbeekBody
 
 	# 채용정보 게시판
-	#CareerTitle = '=' * 20 + ' 채용정보 ' + '=' * 20 + '\n' * 2
-	#CareerBoard = dynamodb.Table('CareerBoard')
-	#CareerPosts = getPosts(CAREER)
+	CareerTitle = getTitleString('채용정보')
+	CareerBoard = dynamodb.Table('CareerBoard')
+	CareerPosts = getPosts(CAREER)
+	CareerBody = newPostsToString(CareerPosts, CareerBoard, CareerTitle)
+	if CareerBody != '':
+		body += '\n\n'
+		body += CareerBody
 
 	# 새 게시글이 있으면 메일로 전송
 	if body != '':

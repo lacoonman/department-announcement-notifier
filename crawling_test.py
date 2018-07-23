@@ -2,13 +2,16 @@ import json
 import requests
 from bs4 import BeautifulSoup
 
-# 크롤링 할 URL
+# URL 목록
 NOTICE = 'http://computer.knu.ac.kr/07_sub/01_sub.html'
 COURSE = 'http://computer.knu.ac.kr/07_sub/01_sub_2.html'
 ABEEK = 'http://computer.knu.ac.kr/07_sub/01_sub_3.html'
 CAREER = 'http://computer.knu.ac.kr/07_sub/01_sub_4.html'
 
-response = requests.get(NOTICE)
+# 크롤링 URL
+URL = CAREER
+
+response = requests.get(CAREER)
 html_doc = response.text
 soup = BeautifulSoup(html_doc, 'html.parser')
 
@@ -135,7 +138,7 @@ for tr in trs:
 			f5.write('제목 : {0} \n'.format(tds[incount].find('b').string))
 		else :
 			f5.write('제목 : {0} \n'.format(tds[incount].find('a').string))
-		f5.write('링크 : {0} \n'.format(NOTICE + tds[incount].find('a')['href']))
+		f5.write('링크 : {0} \n'.format(URL + tds[incount].find('a')['href']))
 		incount += 1
 		# 작성자 출력
 		f5.write('작성자 : {0} \n'.format(tds[incount].string))
