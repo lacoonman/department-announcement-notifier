@@ -53,7 +53,7 @@ def newPostsToString(posts, table, title):
 	return body
 
 def getTitleString(boardname):
-	return '=' * 20 + ' ' + boardname + ' ' + '=' * 20 + '\n' * 2
+	return '=' * 30 + ' ' + boardname + ' ' + '=' * 30 + '\n' * 2
 
 
 def handler(event, context):
