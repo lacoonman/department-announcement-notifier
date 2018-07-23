@@ -27,14 +27,8 @@ class Post(object):
 		return Item
 
 
-def getNoticePosts():
-	# 크롤링 할 URL
-	NOTICE = 'http://computer.knu.ac.kr/07_sub/01_sub.html'
-	COURSE = 'http://computer.knu.ac.kr/07_sub/01_sub_2.html'
-	ABEEK = 'http://computer.knu.ac.kr/07_sub/01_sub_3.html'
-	CAREER = 'http://computer.knu.ac.kr/07_sub/01_sub_4.html'
-
-	response = requests.get(NOTICE)
+def getPosts(URL):
+	response = requests.get(URL)
 	html_doc = response.text
 	soup = BeautifulSoup(html_doc, 'html.parser')
 
@@ -73,7 +67,7 @@ def getNoticePosts():
 				title = tds[incount].find('b').string
 			else:
 				title = tds[incount].find('a').string
-			link = NOTICE + tds[incount].find('a')['href']
+			link = URL + tds[incount].find('a')['href']
 			incount += 1
 			# 작성자 출력
 			writer = tds[incount].string
@@ -92,7 +86,14 @@ def getNoticePosts():
 
 
 if __name__ == '__main__':
-	posts = getNoticePosts()
+	# 크롤링 할 URL
+	NOTICE = 'http://computer.knu.ac.kr/07_sub/01_sub.html'
+	COURSE = 'http://computer.knu.ac.kr/07_sub/01_sub_2.html'
+	ABEEK = 'http://computer.knu.ac.kr/07_sub/01_sub_3.html'
+	CAREER = 'http://computer.knu.ac.kr/07_sub/01_sub_4.html'
+
+	# 함수 실행
+	posts = getNoticePosts(CAREER)
 	# 표준출력
 	for post in posts:
 		print(post)

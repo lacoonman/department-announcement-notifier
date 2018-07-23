@@ -1,52 +1,12 @@
-from crawling import getNoticePosts
+from crawling import getPosts
 from notice import send_mail
 from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError
-from email.mime.text import MIMEText
 from bs4 import BeautifulSoup
-from datetime import date, datetime
 import requests
-import pytz
 import boto3
 import decimal
 import json
-import smtplib
-
-
-# def get(event):
-# 	user_id = event['queryStringParameters']['id']
-# 	return {'body': {'id': user_id, 'name': 'test'}}
-
-
-# def post(event):
-# 	user_id = event['queryStringParameters']['id']
-# 	body = event['body']
-# 	header = event['headers']
-# 	return {'body': {'id': user_id, 'header': header, 'body': body}}
-
-
-# route_map = {
-# 	'/test': {
-# 		'GET': get,
-# 		'POST': post
-# 	}
-# }
-
-
-# def router(event):
-# 	controller = route_map[event['path']][event['httpMethod']]
-
-# 	if not controller:
-# 		return {'body': {'Error': 'Invalid Path'}}
-
-# 	return controller(event)
-
-
-# def handler(event, context):
-# 	#return {'event' : str(event), 'context' : str(context)}
-# 	#return {'body': json.dumps(event)}
-# 	result = router(event)
-# 	return {'body': json.dumps(result)}
 
 
 class DecimalEncoder(json.JSONEncoder):
@@ -59,28 +19,22 @@ class DecimalEncoder(json.JSONEncoder):
         return super(DecimalEncoder, self).default(o)
 
 
-def handler(event, context):
-	# 공지사항 게시판을 크롤링
-	posts = getNoticePosts()
-	# dynamo DB
-	dynamodb = boto3.resource('dynamodb', region_name='ap-northeast-2')
-	NoticeBoard = dynamodb.Table('NoticeBoard')
-	# 크롤링된 게시글을 문자열로 변환해 메일로 전송
-	log = ''
+def newPostsToString(posts, table, title):
+	# 크롤링된 게시글을 문자열로 변환
 	body = ''
 	for one_post in posts:
 		if one_post.number != '공지':
 			# 데이터베이스에 Item이 있는지 확인
-			response = NoticeBoard.get_item(
+			response = table.get_item(
 				Key={
 					'number': int(one_post.number)
 				}
 			)
 			try:
 				response['Item']
-			# 데이터베이스에 Item이 없으면 Item을 추가하고 메일로 전송
+			# 데이터베이스에 Item이 없으면 Item을 추가하고 메일 본문에 추가
 			except Exception as e:
-				NoticeBoard.put_item(
+				table.put_item(
 					Item={
 						'number': int(one_post.number),
 						'title': str(one_post.title),
@@ -92,8 +46,62 @@ def handler(event, context):
 				)
 				body += str(one_post)
 				body += '\n'
+	
+	if body != '':
+		body = title + body
+	
+	return body
+
+
+def handler(event, context):
+	# 크롤링 할 URL
+	NOTICE = 'http://computer.knu.ac.kr/07_sub/01_sub.html'
+	COURSE = 'http://computer.knu.ac.kr/07_sub/01_sub_2.html'
+	ABEEK = 'http://computer.knu.ac.kr/07_sub/01_sub_3.html'
+	CAREER = 'http://computer.knu.ac.kr/07_sub/01_sub_4.html'
+
+	# 로그 string
+	log = ''
+
+	# 메일 body
+	body = ''
+	
+	# dynamo DB
+	dynamodb = boto3.resource('dynamodb', region_name='ap-northeast-2')
+	# 공지사항 게시판
+	NoticeTitle = '=' * 20 + ' 공지사항 ' + '=' * 20 + '\n' * 2
+	NoticeBoard = dynamodb.Table('NoticeBoard')
+	NoticePosts = getPosts(NOTICE)
+	NoticeBody = newPostsToString(NoticePosts, NoticeBoard, NoticeTitle)
+	if NoticeBody != '':
+		body += '\n\n'
+		body += NoticeBody
+	# 학사 게시판
+	CourseTitle = '=' * 20 + ' 학사 ' + '=' * 20 + '\n' * 2
+	CourseBoard = dynamodb.Table('CourseBoard')
+	CoursePosts = getPosts(COURSE)
+	CourseBody = newPostsToString(CoursePosts, CourseBoard, CourseTitle)
+	if CourseBody != '':
+		body += '\n\n'
+		body += CourseBody
+	# ABEEK 게시판
+	AbeekTitle = '=' * 20 + ' ABEEK ' + '=' * 20 + '\n' * 2
+	AbeekBoard = dynamodb.Table('AbeekBoard')
+	Abeekposts = getPosts(ABEEK)
+	AbeekBody = newPostsToString(Abeekposts, AbeekBoard, AbeekTitle)
+	if AbeekBody != '':
+		body += '\n\n'
+		body += AbeekBody
+
+	# 채용정보 게시판
+	#CareerTitle = '=' * 20 + ' 채용정보 ' + '=' * 20 + '\n' * 2
+	#CareerBoard = dynamodb.Table('CareerBoard')
+	#CareerPosts = getPosts(CAREER)
+
+	# 새 게시글이 있으면 메일로 전송
 	if body != '':
 		send_mail(body)
+
 	return log
 
 if __name__ == '__main__':

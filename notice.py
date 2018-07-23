@@ -1,6 +1,10 @@
-import smtplib
 from email.mime.text import MIMEText
 from IDPW import ID, PW
+from datetime import date, datetime
+from email.mime.text import MIMEText
+import pytz
+import smtplib
+
 
 def send_mail(body=''):
 	# SMTP를 활용한 메일 전송
