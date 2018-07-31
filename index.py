@@ -19,6 +19,10 @@ class DecimalEncoder(json.JSONEncoder):
         return super(DecimalEncoder, self).default(o)
 
 
+def getTitleString(boardname):
+	return '<' + boardname + '>' + '\n' * 2
+
+
 def newPostsToString(posts, table, title):
 	# 크롤링된 게시글을 문자열로 변환
 	body = ''
@@ -51,9 +55,6 @@ def newPostsToString(posts, table, title):
 		body = title + body
 	
 	return body
-
-def getTitleString(boardname):
-	return '=' * 30 + ' ' + boardname + ' ' + '=' * 30 + '\n' * 2
 
 
 def handler(event, context):
