@@ -24,31 +24,66 @@ def getTitleString(boardname):
 
 
 def newPostsToString(posts, table, title):
+	print(title)
 	# 크롤링된 게시글을 문자열로 변환
 	body = ''
-	for one_post in posts:
-		if one_post.number != '공지':
-			# 데이터베이스에 Item이 있는지 확인
+	for post in posts:
+		if post.number != '공지':
+			# 데이터베이스에서 데이터를 읽음
 			response = table.get_item(
 				Key={
-					'number': int(one_post.number)
+					'number': int(post.number)
 				}
 			)
-			try:
-				response['Item']
-			# 데이터베이스에 Item이 없으면 Item을 추가하고 메일 본문에 추가
-			except Exception as e:
+			# 데이터베이스에서 항목이 있는 경우
+			if 'Item' in response:
+				item = response['Item']
+				# 항목이 있으면서 제목이 같을 경우
+				if item['title'] == str(post.title):
+					#print(json.dumps(item, indent=4, cls=DecimalEncoder))
+					print("Read Item")
+					print('number : {0}\ntitle :{1}\n'.format(item['number'], item['title']))
+				# 항목은 있지만 제목이 다를 경우(기존의 게시글이 삭제되고 새 게시글이 올라왔을 경우, 수정되었을 경우)
+				else:
+					# 항목을 업데이트, 메일에 추가
+					table.update_item(
+						Key={
+							'number': int(post.number)
+						},
+						UpdateExpression="set title=:t, link=:l, writer=:w, #dt=:d, #vw=:v",
+						# UpdateExpression에서 예약어가 있기 때문에 문자열을 대체
+						ExpressionAttributeNames={
+							'#dt':'date',
+							'#vw':'views'
+						},
+						ExpressionAttributeValues={
+							':t': str(post.title),
+							':l': str(post.link),
+							':w': str(post.writer),
+							':d': str(post.date),
+							':v': str(post.views)
+						},
+						ReturnValues="UPDATED_NEW"
+					)
+					print("Update Item")
+					print('number : {0}\ntitle :{1}\n'.format(item['number'], item['title']))
+					body += str(post)
+					body += '\n'
+			# 데이터베이스에 항목이 없는 경우
+			else:
+				# 항목을 삽입, 메일에 추가
+				print("Insert Item")
 				table.put_item(
 					Item={
-						'number': int(one_post.number),
-						'title': str(one_post.title),
-						'link': str(one_post.link),
-						'writer': str(one_post.writer),
-						'date': str(one_post.date),
-						'views': str(one_post.views)
-					}
+							'number': int(post.number),
+							'title': str(post.title),
+							'link': str(post.link),
+							'writer': str(post.writer),
+							'date': str(post.date),
+							'views': str(post.views)
+						}
 				)
-				body += str(one_post)
+				body += str(post)
 				body += '\n'
 	
 	if body != '':
