@@ -1,5 +1,6 @@
 from crawling import getPosts
 from notice import send_mail
+from database import scanDB, readDB, writeDB, updateDB
 from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError
 from bs4 import BeautifulSoup
@@ -10,13 +11,13 @@ import json
 
 
 class DecimalEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, decimal.Decimal):
-            if abs(o) % 1 > 0:
-                return float(o)
-            else:
-                return int(o)
-        return super(DecimalEncoder, self).default(o)
+	def default(self, o):
+		if isinstance(o, decimal.Decimal):
+			if abs(o) % 1 > 0:
+				return float(o)
+			else:
+				return int(o)
+		return super(DecimalEncoder, self).default(o)
 
 
 def getTitleString(boardname):
@@ -85,10 +86,10 @@ def newPostsToString(posts, table, title):
 				)
 				body += str(post)
 				body += '\n'
-	
+
 	if body != '':
 		body = title + body
-	
+
 	return body
 
 
@@ -104,7 +105,7 @@ def handler(event, context):
 
 	# 메일 body
 	body = ''
-	
+
 	# dynamo DB
 	dynamodb = boto3.resource('dynamodb', region_name='ap-northeast-2')
 	# 공지사항 게시판
