@@ -40,7 +40,7 @@ def send_mail(body=''):
 	# 제목
 	msg['Subject'] = '{0} 학과 공지사항입니다.'.format(seoul_dt.strftime(fmt))
 	# 수신자
-	msg['To'] = 'teakan7179@gmail.com'
+	msg['To'] = ','.join(emails)
 	# 메일 전송
 	print(emails)
 	smtp.sendmail('knucse.mailsender@gmail.com', emails, msg.as_string())
