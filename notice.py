@@ -30,7 +30,6 @@ def send_mail(body=''):
 	smtp.login(ID, PW)
 	
 	# 본문 
-	#msg = MIMEText('본문')
 	msg = MIMEText(body)
 	fmt = '%Y-%m-%d %H:%M:%S'
 	utc = pytz.timezone('UTC')
