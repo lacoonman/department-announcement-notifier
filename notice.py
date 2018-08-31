@@ -4,7 +4,6 @@ from database import scanDB
 from email.mime.text import MIMEText
 from IDPW import ID, PW
 from datetime import date, datetime
-from email.mime.text import MIMEText
 import boto3
 import pytz
 import smtplib
@@ -38,6 +37,8 @@ def send_mail(body=''):
 	seoul_dt = utc_dt.astimezone(seoul)
 	# 제목
 	msg['Subject'] = '{0} 학과 공지사항입니다.'.format(seoul_dt.strftime(fmt))
+	# 발신자
+	msg['From'] = '공지사항 알리미'
 	# 수신자
 	msg['To'] = ','.join(emails)
 	# 메일 전송
