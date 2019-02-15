@@ -22,10 +22,7 @@ def send_mail(body=''):
 		emails.append(str(item['email']))
 
 	# SMTP를 활용한 메일 전송
-	smtp = smtplib.SMTP('smtp.gmail.com', 587)
-	smtp.ehlo()      # say Hello
-	smtp.starttls()  # TLS 사용시 필요
-	smtp.ehlo()
+	smtp = smtplib.SMTP_SSL('smtp.gmail.com', 465)
 	smtp.login(ID, PW)
 	
 	# 본문 
